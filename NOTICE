@@ -1,0 +1,15 @@
+pi-relay-fast
+
+Derived from the fast extension in diegopetrucci/pi-extensions (pi-fast 0.1.8):
+https://github.com/diegopetrucci/pi-extensions/tree/main/extensions/fast
+Copyright (c) 2026 Diego Petrucci. Licensed under the MIT License.
+The upstream copyright and MIT license are retained in LICENSE.
+
+Third-party relay targeting and service-tier control were inspired by
+wbxs2077/opencode-relay-fast:
+https://github.com/wbxs2077/opencode-relay-fast
+Copyright (c) 2026 wbxs2077. Licensed under the MIT License.
+This project uses Pi's native extension hooks rather than OpenCode's fetch wrapper.
+
+This is an independently maintained Pi extension, not an official OpenAI,
+Anthropic, Pi, or upstream pi-fast release.

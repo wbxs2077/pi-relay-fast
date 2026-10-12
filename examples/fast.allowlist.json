@@ -1,0 +1,12 @@
+{
+  "enabled": false,
+  "showStatus": true,
+  "relay": {
+    "mode": "allowlist",
+    "providers": ["my-relay"],
+    "baseURLs": [],
+    "models": ["gpt-*"],
+    "serviceTier": "priority",
+    "overwriteServiceTier": false
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "enabled": false,
+  "showStatus": true,
+  "relay": {
+    "mode": "auto",
+    "models": ["gpt-*"],
+    "serviceTier": "priority",
+    "overwriteServiceTier": false
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "name": "pi-relay-fast",
+  "version": "0.1.0",
+  "description": "Fast mode for Pi with automatic OpenAI-compatible relay support, model filters, and native request hooks.",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "openai",
+    "anthropic",
+    "codex",
+    "relay",
+    "service_tier",
+    "fast-mode"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wbxs2077/pi-relay-fast.git"
+  },
+  "homepage": "https://github.com/wbxs2077/pi-relay-fast#readme",
+  "bugs": {
+    "url": "https://github.com/wbxs2077/pi-relay-fast/issues"
+  },
+  "files": [
+    "index.ts",
+    "relay.ts",
+    "examples/fast.json",
+    "examples/fast.allowlist.json",
+    "examples/models.json",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "pi": {
+    "extensions": [
+      "index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "check:package": "npm pack --dry-run --ignore-scripts",
+    "check": "npm run typecheck && npm run check:package",
+    "prepack": "npm run check"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "1.1.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0",
+    "@earendil-works/pi-ai": "1.1.0"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  }
+}
