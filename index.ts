@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { homedir } from "node:os";
+import { dirname, join, resolve } from "node:path";
 import {
   CONFIG_DIR_NAME,
   getAgentDir,
@@ -12,6 +13,7 @@ import { DEFAULT_RELAY_CONFIG, matchRelay, mergeRelayConfig, type RelayConfig } 
 const EXTENSION_ID = "fast";
 const ANTHROPIC_PROVIDER_ID = "anthropic";
 const ANTHROPIC_API_ID = "anthropic-messages";
+const ANTHROPIC_OFFICIAL_ORIGIN = "https://api.anthropic.com";
 const ANTHROPIC_FAST_SPEED = "fast";
 const ANTHROPIC_FAST_BETA = "fast-mode-2026-02-01";
 const CLAUDE_CODE_OAUTH_BETAS = ["claude-code-20250219", "oauth-2025-04-20"];
@@ -132,16 +134,24 @@ function canReadProjectConfig(ctx: ProjectConfigContext): boolean {
   return typeof ctx.isProjectTrusted === "function" && ctx.isProjectTrusted();
 }
 
+function samePath(a: string, b: string): boolean {
+  const [left, right] = [resolve(a), resolve(b)];
+  return process.platform === "win32" ? left.toLowerCase() === right.toLowerCase() : left === right;
+}
+
+/** Search upward for a project config, stopping before the home directory, whose config dir is the user's own. */
 function findProjectConfigPath(cwd: string): string {
+  const home = homedir();
   let current = cwd;
-  while (true) {
+  while (!samePath(current, home)) {
     const candidate = join(current, CONFIG_DIR_NAME, "fast.json");
     if (existsSync(candidate)) return candidate;
 
     const parent = dirname(current);
-    if (parent === current) return join(cwd, CONFIG_DIR_NAME, "fast.json");
+    if (parent === current) break;
     current = parent;
   }
+  return join(cwd, CONFIG_DIR_NAME, "fast.json");
 }
 
 function loadConfig(ctx: ProjectConfigContext): FastConfig {
@@ -201,6 +211,14 @@ function getEligibility(ctx: ExtensionContext, config: FastConfig): Eligibility 
         eligible: false,
         modelKey: key,
         reason: `current API is ${model.api}, not ${ANTHROPIC_API_ID}`,
+      };
+    }
+
+    if (!isOfficialAnthropicEndpoint(model.baseUrl)) {
+      return {
+        eligible: false,
+        modelKey: key,
+        reason: `Fast mode requires the official endpoint ${ANTHROPIC_OFFICIAL_ORIGIN}`,
       };
     }
 
@@ -285,6 +303,18 @@ function getEligibility(ctx: ExtensionContext, config: FastConfig): Eligibility 
     modelKey: key,
     reason: `current provider ${model.provider} does not support this extension's Fast mode`,
   };
+}
+
+/** Third-party Anthropic endpoints are outside this extension's support. Compare parsed origins. */
+function isOfficialAnthropicEndpoint(baseUrl: unknown): boolean {
+  if (typeof baseUrl !== "string") return false;
+  try {
+    const url = new URL(baseUrl);
+    if (url.username || url.password || url.search || url.hash) return false;
+    return url.origin === ANTHROPIC_OFFICIAL_ORIGIN;
+  } catch {
+    return false;
+  }
 }
 
 function isCanonicalOpenAIEndpoint(baseUrl: unknown): boolean {

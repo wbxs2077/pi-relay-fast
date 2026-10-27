@@ -47,8 +47,9 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test": "node --test test/fast.test.mjs test/load.test.mjs",
     "check:package": "npm pack --dry-run --ignore-scripts",
-    "check": "npm run typecheck && npm run check:package",
+    "check": "npm run typecheck && npm test && npm run check:package",
     "prepack": "npm run check"
   },
   "devDependencies": {

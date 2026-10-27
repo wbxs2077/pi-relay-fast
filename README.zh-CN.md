@@ -60,7 +60,8 @@ Pi 直接引用该目录，不复制源码，因此安装后请保留目录。
 自动匹配无需额外配置。需要调整时，将 [examples/fast.json](examples/fast.json) 合并到：
 
 - 全局：`~/.pi/agent/extensions/fast.json`。
-- 项目：当前目录或祖先目录中最近的 `.pi/fast.json`，仅在 Pi 信任该项目后读取。
+- 项目：当前目录或祖先目录中最近的 `.pi/fast.json`，仅在 Pi 信任该项目后读取；
+  向上查找到用户主目录之前停止。
   信任项目前请检查其配置。
 
 如果 Pi 使用自定义 agent/config 目录，请使用对应位置。修改后重启或 `/reload`。
@@ -96,7 +97,9 @@ JSON 无效、字段未知或类型错误都会停用注入，`/fast on` 也不�
 | `relay.providers` | `[]` | 白名单模式使用的精确 provider ID |
 | `relay.baseURLs` | `[]` | 白名单模式的额外 URL 目标 |
 
-`auto` 忽略目标列表；`allowlist` 要求 provider 或 URL 至少匹配一项，空列表不选中任何中转。
+`auto` 忽略目标列表：只要模型使用 `openai-responses` 或 `openai-completions`、地址不是官方地址、
+且模型 ID 命中 `relay.models`，就会被视为中转目标，这也包括聚合平台和本地服务。如果其中有服务
+不接受 `service_tier`，请改用 `allowlist` 或收窄 `relay.models`。`allowlist` 要求 provider 或 URL 至少匹配一项，空列表不选中任何中转。
 某层配置填写任一目标列表却省略 `mode` 时，该层采用 `allowlist`。模型和 API 过滤仍然生效。
 URL 必须是 HTTP(S)，不得包含凭据、查询参数或片段；按规范化后的完整 origin 和路径匹配，
 忽略末尾斜杠，不做 URL 前缀匹配。
@@ -131,6 +134,7 @@ URL 必须是 HTTP(S)，不得包含凭据、查询参数或片段；按规范�
   切换到不支持的模型/地址后，两种模式都保持关闭，直到手动开启。Pi 显示的费用可能不包含档位溢价。
 
 本次中转支持不包括第三方 Anthropic、Azure/Gemini API、Codex 专用认证协议或中转 Ultrafast。
+Anthropic Fast 只在模型地址为 `https://api.anthropic.com` 时生效。
 扩展不记录请求正文、凭据或完整 URL。
 
 ## 开发
@@ -140,7 +144,7 @@ npm ci --ignore-scripts
 npm run check
 ```
 
-公开检查只执行 TypeScript 检查和打包预览；`npm pack` 打包前也会执行这些检查，
+`npm run check` 执行 TypeScript 检查、离线测试和打包预览；`npm pack` 打包前也会执行这些检查，
 不调用模型服务。问题可通过 [Issues](https://github.com/wbxs2077/pi-relay-fast/issues) 反馈，
 请移除凭据和私人配置。安全漏洞请先请求私下联系渠道，不要公开漏洞细节。
 

@@ -66,7 +66,8 @@ No Fast configuration is required for automatic matching. Optionally merge
 
 - Global: `~/.pi/agent/extensions/fast.json`.
 - Project: the nearest `.pi/fast.json` in the current directory or its ancestors,
-  read only after Pi trusts the project. Review it before trusting the project.
+  read only after Pi trusts the project. The search stops before your home
+  directory. Review it before trusting the project.
 
 If Pi uses a custom agent/config directory, use its corresponding location.
 Restart or `/reload` after editing.
@@ -104,7 +105,11 @@ disable injection, even after `/fast on`.
 | `relay.providers` | `[]` | Exact provider IDs for allowlist mode |
 | `relay.baseURLs` | `[]` | Additional base URL targets for allowlist mode |
 
-In `auto`, target lists are ignored. In `allowlist`, either a provider or URL
+In `auto`, target lists are ignored: every provider whose model uses
+`openai-responses` or `openai-completions` on a non-official endpoint and whose
+model ID matches `relay.models` is targeted. That includes aggregators and local
+servers, so use `allowlist` or narrower `relay.models` if any of them reject
+`service_tier`. In `allowlist`, either a provider or URL
 must match; empty lists select nothing. Supplying either target list without
 `mode` selects `allowlist` for that config layer. Model/API filters still apply.
 URLs must be HTTP(S), without credentials, query, or fragment; matching uses the
@@ -147,7 +152,8 @@ does not remove a tier already provided by another extension or model setting.
   off until manually enabled. Pi's cost display may omit tier premiums.
 
 Third-party Anthropic, Azure/Gemini APIs, Codex-specific relay authentication,
-and relay Ultrafast are outside this extension's relay support. Request bodies,
+and relay Ultrafast are outside this extension's relay support. Anthropic Fast is
+applied only when the model's base URL is `https://api.anthropic.com`. Request bodies,
 credentials, and complete URLs are not logged by the extension.
 
 ## Development
@@ -157,8 +163,9 @@ npm ci --ignore-scripts
 npm run check
 ```
 
-The public check runs TypeScript checking and a package dry run; `npm pack` runs
-the same checks before packing. It does not call model services. Report bugs via
+`npm run check` runs TypeScript checking, the offline test suite, and a package
+dry run; `npm pack` runs the same checks before packing. It does not call model
+services. Report bugs via
 [Issues](https://github.com/wbxs2077/pi-relay-fast/issues), with credentials and
 private configuration removed. For vulnerabilities, request a private contact
 channel without posting exploit details publicly.

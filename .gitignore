@@ -2,7 +2,6 @@ node_modules/
 *.tgz
 .local-notes/
 /docs/
-/test/
 .pi/
 .env
 .env.*
